@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------------
--- linear Approximation for n_inf(i+1)=Ca2(i+1)/(Ca2(i+1)+d5);
+-- linear Approximation for J_pump(i+1)=((Ca2(i+1)^2)/(k_ER^2+Ca2(i+1)^2));;
 -- n_inf(i+1)= A * Ca2 + B
 ----------------------------------------------------------------------------------
 library IEEE;
@@ -9,24 +9,24 @@ use IEEE.STD_LOGIC_signed.ALL;
 --use IEEE.STD_LOGIC_arith.ALL;
 use IEEE.numeric_std.all;
 
-entity n_inf_power_3 is
+entity J_pump_Hardware is
 Generic(Data_Width: integer:=32;
 shift_param: integer:=24);
-    Port ( 
-           Enable       : in  STD_LOGIC;
-	        Ca2          : in  SIGNED (Data_Width-1 downto 0):=(others =>'0');
-           n_inf_power3 : out SIGNED (Data_Width-1 downto 0):=(others =>'0'));
-end n_inf_power_3;
+    Port ( Enable : in  STD_LOGIC;
+	        
+	        Ca2    : in  SIGNED (Data_Width-1 downto 0):=(others =>'0');
+           J_pump : out SIGNED (Data_Width-1 downto 0):=(others =>'0'));
+end J_pump_Hardware;
 
-architecture Behavioral of n_inf_power_3 is
+architecture Behavioral of J_pump_Hardware is
 -------------Internal Signal--------------
 signal reg1: SIGNED (2*Data_Width-1 downto 0):=(others =>'0');
 signal reg2: SIGNED (Data_Width-1 downto 0):=(others =>'0');
 signal A ,B: SIGNED (Data_Width-1 downto 0):=(others =>'0');
 --------------ADD submodul ---------------
-COMPONENT Approximation_Unit2 
+COMPONENT Approximation_Unit3 
      Port ( 
-				Ca2 : in   SIGNED (Data_Width-1 downto 0);
+	         Ca2 : in   SIGNED (Data_Width-1 downto 0);
 			   A   : out  SIGNED (Data_Width-1 downto 0);
             B   : out  SIGNED (Data_Width-1 downto 0));
 END COMPONENT;
@@ -34,8 +34,10 @@ END COMPONENT;
 begin
 --------------Approximation Line ---------
 
-U1 : Approximation_Unit2   
+U1 : Approximation_Unit3   
 	  Port map( Ca2  ,A  ,B );
+
+
 
 process(A ,Enable ,Ca2)
   begin
@@ -49,19 +51,18 @@ end process;
 process(B ,reg1, Enable)
   begin
     if(Enable='1') then	  
-reg2 <= reg1(Data_width+shift_param-1 downto shift_param)+ B;
+reg2 <= reg1(shift_param+Data_Width-1 downto shift_param)+ B;
  else 
  reg2 <= (others =>'0');
  end if;
 end process;
-
-
+--
 --process(CLK)
 --  begin
 --    if(CLK'event and CLK='1') then
 
-       n_inf_power3 <= reg2;
---
+       J_pump <= reg2;
+
 --    end if;
 --end process;
 

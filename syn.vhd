@@ -41,22 +41,22 @@ signal  m_Weight  : signed(2*Data_Width-1 downto 0):=(others => '0');
 signal  m_Isyn    : signed(2*Data_Width-1 downto 0):=(others => '0');
 -----------------------------------------------------------------------------------------------------
 
-constant  Gsyn  : signed(Data_Width-1 downto 0):=X"00000CCC";--0.025;  X"00000666"
-constant  aep   : signed(Data_Width-1 downto 0):=X"00013333";--0.5; X"00008000"  X"00009999"
-constant  dt               : integer := 16; -- 16 bit shift to right ???
+constant  Gsyn  : signed(Data_Width-1 downto 0):= X"000007ae"; 
+constant  aep   : signed(Data_Width-1 downto 0):= X"00013333"; 
+
+constant  dt               : integer := 16; 
 
 constant x  : integer := 16;
 constant  Esyn       : signed(Data_Width-1 downto 0):=X"00000000"; -- -0
 constant  Alpha_Shift_Left :  integer := 3;
-constant  A_0       : signed(Data_Width-1 downto 0):=X"00008000";--X"007D0000";--125;"00000000000000001000000000000000";--0.5
-constant  B_0       : signed(Data_Width-1 downto 0):=X"00008000";--0.5
+constant  A_0       : signed(Data_Width-1 downto 0):=X"00008000";
+constant  B_0       : signed(Data_Width-1 downto 0):=X"00008000";
 constant r_Limit_1  : signed(Data_Width-1 downto 0):=X"FFD80000";
---constant r_Limit_1  : signed(Data_Width-1 downto 0):=X"FFDA0000";--X"00000100";--   0.0039
-constant r_Limit_2  : signed(Data_Width-1 downto 0):=X"FFE80000";--    -0.0039
+constant r_Limit_2  : signed(Data_Width-1 downto 0):=X"FFE80000";
 constant r_Limit_3  : signed(Data_Width-1 downto 0):=X"FFEE0000";
-constant r_Limit_4  : signed(Data_Width-1 downto 0):=X"FFF30000";--    -0.0039
-constant r_Limit_5  : signed(Data_Width-1 downto 0):=X"FFF90000";--X"00000100";--   0.0039
-constant r_Limit_6  : signed(Data_Width-1 downto 0):=X"00070000";--    -0.0039
+constant r_Limit_4  : signed(Data_Width-1 downto 0):=X"FFF30000";
+constant r_Limit_5  : signed(Data_Width-1 downto 0):=X"FFF90000";
+constant r_Limit_6  : signed(Data_Width-1 downto 0):=X"00070000";
 constant r_Limit_7  : signed(Data_Width-1 downto 0):=X"000A0000";
 constant r_Limit_8  : signed(Data_Width-1 downto 0):=X"00110000";
 constant r_Limit_9  : signed(Data_Width-1 downto 0):=X"001E0000";
@@ -100,30 +100,14 @@ begin
  
  r_Weight <= aep+Gsyn  when (Iastro_neuron = '1') else Gsyn;----- gsync = params.gsyn + Iastro_neuron(Post).* params.aep;
  dv <= (Esyn-r_Vpost);
--- m_post   <=  (x"00010000")* dv; ----------S(Pre) .* (params.Esyn - V(Post));
  m_post   <=  r_Func * dv; ----------S(Pre) .* (params.Esyn - V(Post));
--- m_Isyn   <=  r_Weight  * (x"00010000")  ;---------  gsync .* S(Pre) .* (params.Esyn - V(Post));
  m_Isyn   <=  r_Weight  * m_post(x+31 downto x) ;---------  gsync .* S(Pre) .* (params.Esyn - V(Post));
 -----------------------------------------------------------------------------------------------------
--- r_Isyn <= x"00010000";
+
  r_Isyn <= m_Isyn (x+31 downto x);
  Isyn   <= std_logic_vector(r_Isyn); 
--- r_Vpre   <= ((x"00010000"));
    r_Vpre   <= signed(V_pre);
    r_Vpost  <= signed(V_post);
-   
---process(clk)
--- begin
---  if rising_edge(clk) then
---   r_Vpre   <= signed(V_pre);
---   r_Vpost  <= signed(V_post);
---  end if;
---end process;
------------------------------------------------------------------------------------------------------
-
-  
--- V_pre   <= signed(V_pre);
--- V_post  <= signed(V_post);
- 
+    
 end Arch;
 
